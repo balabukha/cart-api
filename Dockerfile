@@ -11,7 +11,7 @@ RUN npm install && npm cache clean --force
 COPY . .
 RUN npm run build
 
-# Set port to 7000
+# Set port to 6000
 USER node
 EXPOSE 6000
 ENV PORT=6000
