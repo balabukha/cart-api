@@ -1,18 +1,27 @@
-FROM node:12-alpine
+FROM node:12 AS base
 
 # Set default directory
-WORKDIR cart-api/
+WORKDIR /app
 
-# Copy package*.json files into WORKDIR directory and install dependencies
+# Dependencies
+FROM base AS dependecies
 COPY package*.json ./
 RUN npm install && npm cache clean --force
 
-# Copy everything from host to docker and build app
-COPY . .
+# Build
+FROM dependecies as build
+WORKDIR /app
+COPY /src ./src
 RUN npm run build
 
+# Application
+FROM node:12-alpine
+WORKDIR /app
+COPY --from=dependecies /app/package*.json ./
+RUN npm ci --production && npm cache clean --force
+COPY --from=build /app/dist ./dist
+
 # Set port to 6000
-USER node
 EXPOSE 6000
 ENV PORT=6000
 
